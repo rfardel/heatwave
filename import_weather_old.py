@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-class DataImportTurnstile:
+class ImportWeather:
 
     def __init__(self):
         # Initialize the spark session
@@ -46,6 +46,6 @@ class DataImportTurnstile:
         ).show(20)
 
 if __name__ == "__main__":
-    d = DataImportTurnstile()
+    d = ImportWeather()
     file_location = "examples/ghcnd-stations.txt"
     d.main(d, file_location)
