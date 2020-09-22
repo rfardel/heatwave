@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+
 class ReadLargeFile:
 
     def __init__(self):
@@ -30,6 +31,7 @@ class ReadLargeFile:
 
         # Close the input file
         f.close()
+
 
 if __name__ == "__main__":
     import sys

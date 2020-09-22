@@ -20,7 +20,7 @@ class ImportWeather:
             StructField("Value", IntegerType(), True),
             StructField("E1", StringType(), True),
             StructField("E2", StringType(), True),
-            StructField("E4", StringType(), True),
+            StructField("E3", StringType(), True),
             StructField("E4", StringType(), True)])
         return schema
 
@@ -29,7 +29,11 @@ class ImportWeather:
         spark = d.spark
         weatherSchema = self.define_schema()
         df = spark.read.csv(file, schema=weatherSchema, header=False)
-        print(df.show(20))
+
+        dft = df.filter(df.Measurement == 'TAVG')
+        print(dft.show(20))
+
+        spark.stop()
 
 if __name__ == "__main__":
     import sys
