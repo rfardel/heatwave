@@ -28,7 +28,7 @@ class ImportWeatherStations:
         return schema
 
     def main(self, d, file):
-        from pyspark.sql.types import FloatType
+        from pyspark.sql.types import FloatType, IntegerType
         # Main function: load the file file and shows 5 lines
         spark = d.spark
         weatherSchema = self.define_schema()
@@ -37,12 +37,20 @@ class ImportWeatherStations:
         df2 = df.select(
             df.value.substr(1, 11).alias('station_id'),
             df.value.substr(13, 8).alias('latitude'),
-            df.value.substr(22, 9).alias('longitude')
+            df.value.substr(22, 9).alias('longitude'),
+            df.value.substr(32, 6).alias('unknown_1'),
+            df.value.substr(39, 2).alias('state'),
+            df.value.substr(42, 30).alias('name'),
+            df.value.substr(73, 3).alias('unknown_2'),
+            df.value.substr(77, 3).alias('unknown_3'),
+            df.value.substr(81, 5).alias('unknown_4'),
+
         )
 
         df3 = df2.withColumn("latitude", df2["latitude"].cast(FloatType()))\
-                 .withColumn("longitude", df2["longitude"].cast(FloatType()))
-
+                 .withColumn("longitude", df2["longitude"].cast(FloatType())) \
+                 .withColumn("unknown_1", df2["unknown_1"].cast(FloatType())) \
+                .withColumn("unknown_4", df2["unknown_4"].cast(IntegerType()))
 
         df3.show(10)
         #df = spark.read.csv(file, schema=weatherSchema, header=False)
