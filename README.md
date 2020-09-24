@@ -1,6 +1,10 @@
 # heatwave
 Insight Data Engineering Fellowship project
 
+## Data sources
+
+### Weather - main source
+
 Main website:
 https://data.nodc.noaa.gov/cgi-bin/iso?id=gov.noaa.ncdc:C00861
 
@@ -10,8 +14,11 @@ https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
 Daily data:
 https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/
 
+### Alternative sources: European reanalysis data:
+https://cds.climate.copernicus.eu/cdsapp#!/search?type=dataset
 
-Tech stack installation
+
+##Tech stack installation
 
 PostGIS on Ubuntu 18.04
 https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
