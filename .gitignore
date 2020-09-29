@@ -1,8 +1,8 @@
 examples/*
 output/*
-*.txt
 local/*
-scratch/*pip
+scratch/*
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

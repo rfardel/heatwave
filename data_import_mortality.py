@@ -38,12 +38,13 @@ class DataImportTurnstile:
         print(df.take(5))
 
         df.select(
-            df.value.substr(23,3).alias('county'),
-            df.value.substr(102,4).alias('year'),
+            df.value.substr(23, 3).alias('county'),
+            df.value.substr(102, 4).alias('year'),
             df.value.substr(65, 2).alias('month'),
-            df.value.substr(85,1).alias('weekday'),
-            df.value.substr(107,1).alias('manner')
+            df.value.substr(85, 1).alias('weekday'),
+            df.value.substr(107, 1).alias('manner')
         ).show(20)
+
 
 if __name__ == "__main__":
     d = DataImportTurnstile()
