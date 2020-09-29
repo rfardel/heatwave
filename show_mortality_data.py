@@ -1,11 +1,10 @@
 #!/usr/bin/python
 
 
-class WriteMortalityData:
+class ShowMortalityData:
 
     def __init__(self):
         from pyspark.sql import SparkSession
-
 
         self.spark = SparkSession \
             .builder \
@@ -17,7 +16,6 @@ class WriteMortalityData:
     def main(self, d, file):
 
         from pyspark.sql.types import FloatType, IntegerType
-        from pyspark.sql import functions as F
         spark = d.spark
 
         # Read the input file from S3
@@ -39,43 +37,27 @@ class WriteMortalityData:
             .withColumn("weekday", df2["weekday"].cast(IntegerType()))
 
         # Show first 20 rows
-        df3 = df3.groupby(df3.year, df3.month, df3.weekday, df3.state, df3.county, df3.manner) \
-                 .agg(F.count(df3.year).alias('number')) \
-                 .sort(df3.year, df3.month, df3.weekday, df3.state, df3.county, df3.manner)
+        df3.show(20)
 
-        df3.show(30)
+        print('count = ' + str(df3.count()))
+
+        df4 = df3.groupby(df3.year, df3.month).agg(count(df3.manner))
+
+        # Aggregate by state, county, month,  year, weekday, manner
+
 
         #dft = df3.filter(df3.month == 5)
         #print(dft.show(20))
 
-        # Write to a new table in PostgreSQL DB
-        df3.write \
-            .format("jdbc") \
-            .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
-            .option("dbtable", "mortality") \
-            .option("user", "testsp") \
-            .option("password", "testsp") \
-            .option("driver", "org.postgresql.Driver") \
-            .save()
 
-        # Read back that table and show first 10 rows
-        # df4 = spark.read \
-        #     .format("jdbc") \
-        #     .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
-        #     .option("dbtable", "mortality") \
-        #     .option("user", "testsp") \
-        #     .option("password", "testsp") \
-        #     .option("driver", "org.postgresql.Driver") \
-        #     .load()
 
-        #df4.show(20)
+
 
         spark.stop()
 
 
 if __name__ == "__main__":
     import sys
-    d = WriteMortalityData()
+    d = ShowMortalityData()
     input_file = str(sys.argv[1])
     d.main(d, input_file)
