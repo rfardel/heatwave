@@ -6,11 +6,12 @@ SELECT counties.state as cstate,
        mortality.year,
        mortality.month,
        mortality.weekday,
-       mortality.number,
+       mortality.manner,
+       mortality.number
 FROM mortality
 JOIN counties
 ON (mortality.fips = counties.cfips AND counties.state = mortality.state)
-WHERE counties.countyname like 'Yu%'
+WHERE counties.countyname like 'Bi%'
 ORDER BY counties.countyname;
 
 /*
