@@ -15,7 +15,7 @@ class ImportWeather:
         from pyspark.sql.types import StructType, StructField, IntegerType, StringType
         schema = StructType([
             StructField("Station", StringType(), True),
-            StructField("Date", IntegerType(), True),
+            StructField("Date", StringType(), True),
             StructField("Measurement", StringType(), True),
             StructField("Value", IntegerType(), True),
             StructField("E1", StringType(), True),
@@ -26,9 +26,14 @@ class ImportWeather:
 
     def main(self, d, file):
         # Main function: load the file file and shows 5 lines
+        from pyspark.sql.functions import col, unix_timestamp, to_date
+
         spark = d.spark
         weatherSchema = self.define_schema()
         df = spark.read.csv(file, schema=weatherSchema, header=False)
+
+        df = df.withColumn('Date',
+                           to_date(unix_timestamp(col('Date'), 'yyyyMMdd').cast("timestamp")))
 
         dft = df.filter(df.Measurement == 'TAVG')
         print(dft.show(20))

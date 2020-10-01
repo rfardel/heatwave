@@ -21,7 +21,7 @@ class WriteWeatherData:
         from pyspark.sql.types import StructType, StructField, IntegerType, StringType
         schema = StructType([
             StructField("station", StringType(), True),
-            StructField("date", IntegerType(), True),
+            StructField("date", StringType(), True),
             StructField("measurement", StringType(), True),
             StructField("value", IntegerType(), True),
             StructField("e1", StringType(), True),
@@ -32,9 +32,13 @@ class WriteWeatherData:
 
     def main(self, d, file):
 
+        from pyspark.sql.functions import col, unix_timestamp, to_date
+
         spark = d.spark
         weather_schema = self.define_schema()
         df = spark.read.csv(file, schema=weather_schema, header=False)
+        df = df.withColumn('date',
+                           to_date(unix_timestamp(col('date'), 'yyyyMMdd').cast("timestamp")))
 
         dft = df.filter(df.measurement == 'TAVG')
 
