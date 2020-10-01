@@ -2,7 +2,7 @@ CREATE TABLE stacou AS
 (SELECT stations.state,
         counties.countyname,
         counties.cfips,
-        stations.name,
+        stations.name AS stationname,
         stations.geom
        --ST_AsText(geom),
        --ST_DWithin(stations.geom, ST_GeomFromText('POINT(-105.819999694824 40.4099998474121)', 4326), 10) as nearby,
