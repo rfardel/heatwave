@@ -2,6 +2,8 @@ SELECT weather.station,
        stations.name,
        CAST(weather.value / 10.0 AS DECIMAL(9,1)) AS TavgC,
        mortality.number,
+       mortality.weekday,
+       mortality.manner,
        counties.countyname
 FROM weather
 JOIN stations
@@ -12,7 +14,9 @@ JOIN mortality
 ON (mortality.fips = counties.cfips
     AND counties.state = mortality.state
    )
-WHERE weather.station like 'US%' AND weather.date = '20030510'
+WHERE weather.station like 'US%'
+AND weather.date = '20030510'
+AND mortality.month = 5
 LIMIT 100
 ;
 
