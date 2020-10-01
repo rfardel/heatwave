@@ -5,13 +5,16 @@ class WriteWeatherData:
 
     def __init__(self):
         from pyspark.sql import SparkSession
+        import os
+
+        self.psql_user = os.environ['POSTGRESQL_USER']
+        self.psql_pw = os.environ['POSTGRESQL_PASSWORD']
 
         self.spark = SparkSession \
             .builder \
             .appName("Write weather data to DB") \
             .getOrCreate()
 
-#            .config("spark.jars", "/home/ubuntu/postgresql-42.2.16.jar") \
 
     def define_schema(self):
         # Return a schema for the yyyy.CSV file
@@ -43,8 +46,8 @@ class WriteWeatherData:
             .mode("append") \
             .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
             .option("dbtable", "weather") \
-            .option("user", "testsp") \
-            .option("password", "testsp") \
+            .option("user", self.psql_user) \
+            .option("password", self.psql_pw) \
             .option("driver", "org.postgresql.Driver") \
             .save()
 
@@ -53,8 +56,8 @@ class WriteWeatherData:
             .format("jdbc") \
             .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
             .option("dbtable", "weather") \
-            .option("user", "testsp") \
-            .option("password", "testsp") \
+            .option("user", self.psql_user) \
+            .option("password", self.psql_pw) \
             .option("driver", "org.postgresql.Driver") \
             .load()
 

@@ -5,7 +5,10 @@ class WriteMortalityData:
 
     def __init__(self):
         from pyspark.sql import SparkSession
+        import os
 
+        self.psql_user = os.environ['POSTGRESQL_USER']
+        self.psql_pw = os.environ['POSTGRESQL_PASSWORD']
 
         self.spark = SparkSession \
             .builder \
@@ -54,8 +57,8 @@ class WriteMortalityData:
             .mode("append") \
             .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
             .option("dbtable", "mortality") \
-            .option("user", "testsp") \
-            .option("password", "testsp") \
+            .option("user", self.psql_user) \
+            .option("password", self.psql_pw) \
             .option("driver", "org.postgresql.Driver") \
             .save()
 
@@ -64,8 +67,8 @@ class WriteMortalityData:
         #     .format("jdbc") \
         #     .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
         #     .option("dbtable", "mortality") \
-        #     .option("user", "testsp") \
-        #     .option("password", "testsp") \
+        #     .option("user", self.psql_user) \
+        #     .option("password", self.psql_pw) \
         #     .option("driver", "org.postgresql.Driver") \
         #     .load()
 

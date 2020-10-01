@@ -1,4 +1,8 @@
 from pyspark.sql import SparkSession
+import os
+
+psql_user = os.environ['POSTGRESQL_USER']
+psql_pw = os.environ['POSTGRESQL_PASSWORD']
 
 spark = SparkSession \
     .builder \
@@ -10,8 +14,8 @@ df = spark.read \
     .format("jdbc") \
     .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
     .option("dbtable", "stations") \
-    .option("user", "testsp") \
-    .option("password", "testsp") \
+    .option("user", psql_user ) \
+    .option("password", psql_pw) \
     .option("driver", "org.postgresql.Driver") \
     .load()
 
