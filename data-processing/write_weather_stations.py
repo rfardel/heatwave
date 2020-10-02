@@ -51,7 +51,7 @@ class WriteWeatherStations:
         df3.write \
             .format("jdbc") \
             .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
             .option("dbtable", "stations") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \
@@ -61,7 +61,7 @@ class WriteWeatherStations:
         # Read back that table and show first 10 rows
         df4 = spark.read \
             .format("jdbc") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
             .option("dbtable", "stations") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \

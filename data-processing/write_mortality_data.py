@@ -55,7 +55,7 @@ class WriteMortalityData:
         df3.write \
             .format("jdbc") \
             .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
             .option("dbtable", "mortality") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \
@@ -65,7 +65,7 @@ class WriteMortalityData:
         # Read back that table and show first 10 rows
         # df4 = spark.read \
         #     .format("jdbc") \
-        #     .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+        #     .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
         #     .option("dbtable", "mortality") \
         #     .option("user", self.psql_user) \
         #     .option("password", self.psql_pw) \

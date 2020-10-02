@@ -12,7 +12,7 @@ spark = SparkSession \
 
 df = spark.read \
     .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+    .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
     .option("dbtable", "stations") \
     .option("user", psql_user ) \
     .option("password", psql_pw) \

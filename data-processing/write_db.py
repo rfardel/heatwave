@@ -12,7 +12,7 @@ spark = SparkSession \
 
 df = spark.read \
     .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+    .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
     .option("dbtable", "stations") \
     .option("user", psql_user ) \
     .option("password", psql_pw) \
@@ -24,7 +24,7 @@ df.show()
 df.write \
     .format("jdbc") \
     .mode("append") \
-    .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+    .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
     .option("dbtable", "station3") \
     .option("user", psql_user ) \
     .option("password", psql_pw) \
@@ -33,7 +33,7 @@ df.write \
 
 df2 = spark.read \
     .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.14:5432/ubuntu") \
+    .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
     .option("dbtable", "station3") \
     .option("user", psql_user ) \
     .option("password", psql_pw) \

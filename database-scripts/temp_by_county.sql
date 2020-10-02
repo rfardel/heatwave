@@ -22,7 +22,7 @@ ON (mortality.fips = counties.cfips
     AND counties.state = mortality.state
    )
 
-WHERE (weather.date >= 20030501) AND (weather.date <= 20030503)
+WHERE weather.date BETWEEN '2003-05-01' AND '2003-05-10'
     AND weather.station LIKE 'US%'
 GROUP BY stations.state,
          counties.countyname,
