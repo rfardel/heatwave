@@ -11,7 +11,7 @@ ON stations.station_id = weather.station
 JOIN counties
 ON ST_Contains(counties.geom, stations.geom)
 JOIN mortality
-ON (mortality.fips = counties.cfips
+ON (mortality.county_fips = counties.cfips
     AND counties.state = mortality.state
    )
 WHERE weather.station like 'US%'
@@ -35,7 +35,7 @@ JOIN (SELECT counties.state as cstate,
              mortality.state as mstate,
              counties.countyname,
              counties.cfips as cfips,
-             mortality.fips as mfips,
+             mortality.county_fips as mfips,
              mortality.year,
              mortality.month,
              mortality.weekday,
@@ -44,7 +44,7 @@ JOIN (SELECT counties.state as cstate,
              counties.geom
       FROM mortality
       JOIN counties
-      ON (mortality.fips = counties.cfips AND counties.state = mortality.state)
+      ON (mortality.county_fips = counties.cfips AND counties.state = mortality.state)
       WHERE counties.countyname LIKE 'Bi%'
       AND mortality.month = 5
       ORDER BY counties.countyname;
@@ -83,7 +83,7 @@ ORDER BY stations.state, TavgC;*/
        mortality.state as mstate,
        counties.countyname,
        counties.cfips as cfips,
-       mortality.fips as mfips,
+       mortality.county_fips as mfips,
        mortality.year,
        mortality.month,
        mortality.weekday,
@@ -91,7 +91,7 @@ ORDER BY stations.state, TavgC;*/
        mortality.number
 FROM mortality
 JOIN counties
-ON (mortality.fips = counties.cfips AND counties.state = mortality.state)
+ON (mortality.county_fips = counties.cfips AND counties.state = mortality.state)
 WHERE counties.countyname like 'Bi%'
 ORDER BY counties.countyname; */
 

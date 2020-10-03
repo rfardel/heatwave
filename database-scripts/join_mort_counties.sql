@@ -2,7 +2,7 @@ SELECT counties.state as cstate,
        mortality.state as mstate,
        counties.countyname,
        counties.cfips as cfips,
-       mortality.fips as mfips,
+       mortality.county_fips as mfips,
        mortality.year,
        mortality.month,
        mortality.weekday,
@@ -10,7 +10,7 @@ SELECT counties.state as cstate,
        mortality.number
 FROM mortality
 JOIN counties
-ON (mortality.fips = counties.cfips AND counties.state = mortality.state)
+ON (mortality.county_fips = counties.cfips AND counties.state = mortality.state)
 WHERE counties.countyname like 'Bi%'
 ORDER BY counties.countyname;
 
