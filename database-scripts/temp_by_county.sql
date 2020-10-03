@@ -23,10 +23,10 @@ ON (mortality.county_fips = counties.cfips
     AND date_trunc('month', mortality.date) = date_trunc('month', weather.date)
    )
 
-WHERE weather.date BETWEEN '2003-05-01' AND '2003-05-10'
-    AND weather.station LIKE 'US%'
-    AND counties.countyname LIKE 'Los A%'
-    AND stations.state LIKE 'CA'
+WHERE weather.station LIKE 'US%'
+      --AND weather.date BETWEEN '2003-05-01' AND '2003-05-10'
+      --AND counties.countyname LIKE 'Los A%'
+      --AND stations.state LIKE 'CA'
 GROUP BY stations.state,
          counties.countyname,
          weather.date,
