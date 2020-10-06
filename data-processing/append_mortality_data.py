@@ -15,8 +15,6 @@ class AppendMortalityData:
             .appName("Write mortality data to DB") \
             .getOrCreate()
 
-#            .config("spark.jars", "/home/ubuntu/postgresql-42.2.16.jar") \
-
     def create_schema(self):
 
         from pyspark.sql.types import StructType, \
@@ -26,9 +24,12 @@ class AppendMortalityData:
                                       DateType
 
         schema = StructType([
-            StructField(''county_fips'', (), True),
-            StructField('middlename', StringType(), True),
-            StructField('lastname', StringType(), True)
+            StructField('state', StringType(), True),
+            StructField('county_fips', IntegerType(), True),
+            StructField('date', DateType(), True),
+            StructField('weekday', IntegerType(), True),
+            StructField('manner', IntegerType(), True),
+            StructField('number', IntegerType(), True)
             ])
 
         return schema
@@ -62,29 +63,11 @@ class AppendMortalityData:
             df.value.substr(schema['state_s'], schema['state_l']).alias('state'),
             df.value.substr(schema['county_s'], schema['county_l']).alias('county_fips'),
             df.value.substr(schema['year_s'], schema['year_l']).alias('year'),
-            df.value.substr(schema['month_s'], schema['month_l']).alias('month')
+            df.value.substr(schema['month_s'], schema['month_l']).alias('month'),
+#            df.value.substr(schema['day_s'], schema['day_l']).alias('day'),
+            df.value.substr(schema['weekday_s'], schema['weekday_l']).alias('weekday'),
+            df.value.substr(schema['manner_s'], schema['manner_l']).alias('manner'),
         )
-
-        # Calendar day
-        try:
-            df = df.value.substr(schema['day_s'], schema['day_l']).alias('day')
-        except AttributeError:
-            print('"Day" field does not exists')
-            df = df.withColumn('day', lit(None).cast(StringType()))
-
-        # Weekday
-        try:
-            df = df.value.substr(schema['weekday_s'], schema['weekday_l']).alias('weekday')
-        except AttributeError:
-            print('"Weekday" field does not exists')
-            df = df.withColumn('weekday', lit(None).cast(StringType()))
-
-        # Manner
-        try:
-            df = df.value.substr(schema['manner_s'], schema['manner_l']).alias('manner')
-        except AttributeError:
-            print('"Manner" field does not exists')
-            df = df.withColumn('manner', lit(None).cast(StringType()))
 
         df.printSchema()
 
@@ -127,49 +110,50 @@ class AppendMortalityData:
                  .withColumn('weekday', df2['weekday'].cast(IntegerType()))
 
         # # Sum up death counts for each combination of parameters
-        df3 = df3.groupby(df3.date, df3.weekday, df3.state, df3.county_fips, df3.manner) \
+        df3 = df3.groupby(df3.state, df3.county_fips, df3.date, df3.weekday, df3.manner) \
                  .agg(F.count(df3.date).alias('number')) \
-                 .sort(df3.date, df3.weekday, df3.state, df3.county_fips, df3.manner)
+                 .sort(df3.state, df3.county_fips, df3.date, df3.weekday, df3.manner)
         #
         df3.show(30)
         #
         # #dft = df3.filter(df3.month == 5)
         # #print(dft.show(20))
-        return
+        return df3
 
     def main(self, d, first_vintage, last_vintage):
 
-
         if first_vintage > last_vintage:
             raise Exception("First year cannot be after the last year")
-
         if (first_vintage < 1968) or (first_vintage > 2018):
             raise Exception("First year out of range")
-
         if (last_vintage < 1968) or (last_vintage > 2018):
             raise Exception("Last year out of range")
+
+        main_df = d.spark.createDataFrame([], self.create_schema())
+        main_df.show()
 
         # Generate inclusive list of years
         vintages = range(first_vintage, last_vintage + 1)
         for vintage in vintages:
             print(vintage)
+            new_df = self.process_year(d, vintage)
+            main_df = main_df.union(new_df)
 
-        new_df = self.process_year(d, first_vintage)
-
-        main_df = main_df.union(new_df)
         main_df.show(20)
 
+        main_df.write \
+            .format("jdbc") \
+            .mode("append") \
+            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
+            .option("dbtable", "mortality") \
+            .option("user", self.psql_user) \
+            .option("password", self.psql_pw) \
+            .option("driver", "org.postgresql.Driver") \
+            .save()
 
+        d.spark.stop()
 
-        spark = d.spark
-
-        df1 = spark.sparkContext.parallelize([]).toDF(schema)
-        df1.printSchema()
-
-        df2 = spark.createDataFrame([], schema)
-        df2.printSchema()
-
-        spark.stop()
+        return
 
 
 if __name__ == "__main__":
