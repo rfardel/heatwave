@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-class CleanMortalityData:
+class AppendMortalityData:
 
     def __init__(self):
         from pyspark.sql import SparkSession
@@ -17,13 +17,44 @@ class CleanMortalityData:
 
 #            .config("spark.jars", "/home/ubuntu/postgresql-42.2.16.jar") \
 
+    def create_schema(self):
+
+        from pyspark.sql.types import StructType, \
+                                      StructField, \
+                                      StringType, \
+                                      IntegerType, \
+                                      DateType
+
+        schema = StructType([
+            StructField(''county_fips'', (), True),
+            StructField('middlename', StringType(), True),
+            StructField('lastname', StringType(), True)
+            ])
+
+        return schema
+
     def load_schema(self, vintage):
+        """
+        Read from a JSON file the schema for a given mortality year
+
+        :param vintage: Year for which to retrieve schema
+        :return: Dictonary of starting position and length
+            for each exiting field of that year
+        """
+
         import json
         f = open('mort_schema.json', 'rt')
         j = json.load(f)
         return j[str(vintage)]
 
     def transform_to_schema(self, df, schema):
+        """
+        Splits a fixed-with string dataframe into a specified schema
+
+        :param df: Inout dataframne
+        :param schema: Dictionary of starting position and length for each field
+        :return: Dataframe with columns
+        """
         from pyspark.sql.types import StringType
         from pyspark.sql.functions import lit
 
@@ -61,7 +92,7 @@ class CleanMortalityData:
         df2.show(10)
         return df2
 
-    def main(self, d, vintage):
+    def process_year(self, d, vintage):
 
         from pyspark.sql.types import IntegerType
         from pyspark.sql import functions as F
@@ -104,17 +135,46 @@ class CleanMortalityData:
         #
         # #dft = df3.filter(df3.month == 5)
         # #print(dft.show(20))
+        return
+
+    def main(self, d, first_vintage, last_vintage):
+
+
+        if first_vintage > last_vintage:
+            raise Exception("First year cannot be after the last year")
+
+        if (first_vintage < 1968) or (first_vintage > 2018):
+            raise Exception("First year out of range")
+
+        if (last_vintage < 1968) or (last_vintage > 2018):
+            raise Exception("Last year out of range")
+
+        # Generate inclusive list of years
+        vintages = range(first_vintage, last_vintage + 1)
+        for vintage in vintages:
+            print(vintage)
+
+        new_df = self.process_year(d, first_vintage)
+
+        main_df = main_df.union(new_df)
+        main_df.show(20)
 
 
 
+        spark = d.spark
+
+        df1 = spark.sparkContext.parallelize([]).toDF(schema)
+        df1.printSchema()
+
+        df2 = spark.createDataFrame([], schema)
+        df2.printSchema()
 
         spark.stop()
 
-        print(file)
-        print(type(file))
 
 if __name__ == "__main__":
     import sys
-    d = CleanMortalityData()
-    input_file = str(sys.argv[1])
-    d.main(d, input_file)
+    d = AppendMortalityData()
+    first_vintage = int(sys.argv[1])
+    last_vintage = int(sys.argv[2])
+    d.main(d, first_vintage, last_vintage)
