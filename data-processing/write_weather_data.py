@@ -32,8 +32,6 @@ class WriteWeatherData:
 
     def main(self, d, file):
 
-        from pyspark.sql.functions import col, unix_timestamp, to_date
-
         spark = d.spark
         weather_schema = self.define_schema()
         df = spark.read.csv(file, schema=weather_schema, header=False)

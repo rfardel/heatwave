@@ -28,11 +28,8 @@ class AppendMortalityData:
 
     def create_schema(self):
 
-        from pyspark.sql.types import StructType, \
-            StructField, \
-            StringType, \
-            IntegerType, \
-            DateType
+        from pyspark.sql.types import StructType, StructField,\
+            IntegerType, StringType, DateType
 
         schema = StructType([
             StructField('state', StringType(), True),
@@ -146,12 +143,7 @@ class AppendMortalityData:
 
     def main(self, d, first_vintage, last_vintage):
 
-        if first_vintage > last_vintage:
-            raise Exception("First year cannot be after the last year")
-        if (first_vintage < 1968) or (first_vintage > 2018):
-            raise Exception("First year out of range")
-        if (last_vintage < 1968) or (last_vintage > 2018):
-            raise Exception("Last year out of range")
+
 
         main_df = d.spark.createDataFrame([], self.create_schema())
         main_df.show()
