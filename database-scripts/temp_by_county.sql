@@ -5,9 +5,7 @@ SELECT stations.state,
        weather.measurement,
        CAST(AVG(weather.value)/10 AS DECIMAL(9,2)) AS avg_value,
        SUM(mortality.number) as sum_mort,
-       mortality.date AS mort_date,
-       mortality.weekday,
-       mortality.manner
+       mortality.date AS mort_date
 FROM weather
 
 LEFT JOIN stations
@@ -19,8 +17,8 @@ ON (ST_Contains(counties.geom, stations.geom)
 
 JOIN mortality
 ON (mortality.county_fips = counties.cfips
-    AND mortality.state = (CAST counties.sfips AS varchar)
-    AND date_trunc('month', mortality.date) = date_trunc('month', weather.date)
+    AND mortality.state = counties.state
+    AND date_trunc('day', mortality.date) = date_trunc('day', weather.date)
    )
 
 WHERE weather.station LIKE 'US%'
@@ -31,7 +29,5 @@ GROUP BY stations.state,
          counties.countyname,
          weather.date,
          weather.measurement,
-         mortality.date,
-         mortality.weekday,
-         mortality.manner
+         mortality.date
 ORDER BY weather.date, nb_stations DESC, stations.state, counties.countyname, weather.measurement;

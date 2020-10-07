@@ -165,15 +165,15 @@ class AppendMortalityData:
 
         main_df.show(20)
 
-        # main_df.write \
-        #     .format("jdbc") \
-        #     .mode("append") \
-        #     .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
-        #     .option("dbtable", "mortality") \
-        #     .option("user", self.psql_user) \
-        #     .option("password", self.psql_pw) \
-        #     .option("driver", "org.postgresql.Driver") \
-        #     .save()
+        main_df.write \
+            .format("jdbc") \
+            .mode("append") \
+            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
+            .option("dbtable", "mortality") \
+            .option("user", self.psql_user) \
+            .option("password", self.psql_pw) \
+            .option("driver", "org.postgresql.Driver") \
+            .save()
 
         d.spark.stop()
 
