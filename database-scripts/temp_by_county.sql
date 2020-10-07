@@ -19,7 +19,7 @@ ON (ST_Contains(counties.geom, stations.geom)
 
 JOIN mortality
 ON (mortality.county_fips = counties.cfips
-    AND counties.state = mortality.state
+    AND mortality.state = (CAST counties.sfips AS varchar)
     AND date_trunc('month', mortality.date) = date_trunc('month', weather.date)
    )
 

@@ -89,7 +89,10 @@ class WriteMortalityData:
 
 
 if __name__ == "__main__":
-    import sys
+    import sys, time
+
+    start_time = time.time()
     d = WriteMortalityData()
     input_file = str(sys.argv[1])
     d.main(d, input_file)
+    print('Execution time : ' + str(round(time.time() - start_time)))
