@@ -1,3 +1,4 @@
+CREATE TABLE combined AS (
 SELECT stations.state,
        counties.countyname,
        count(stations.name) as nb_stations,
@@ -30,4 +31,5 @@ GROUP BY stations.state,
          weather.date,
          weather.measurement,
          mortality.date
-ORDER BY weather.date, nb_stations DESC, stations.state, counties.countyname, weather.measurement;
+ORDER BY weather.date, nb_stations DESC, stations.state, counties.countyname, weather.measurement
+);

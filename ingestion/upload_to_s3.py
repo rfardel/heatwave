@@ -58,7 +58,7 @@ class UploadToS3:
 
     def main(self):
         bucket = 'data-engineer.club'
-        for year in range(1970, 2016):      # End year excluded
+        for year in range(1969, 1970):      # End year excluded
             print('Processing year ' + str(year))
             file_name = 'mort' + str(year) + 'us.zip'
             #file_name = 'mort2018ps.zip'

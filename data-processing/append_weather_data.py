@@ -98,8 +98,6 @@ class AppendWeatherData:
             new_df = self.process_year(d, vintage)
             main_df = main_df.union(new_df)
 
-        main_df.show(20)
-
         # Write to a new table in PostgreSQL DB
         main_df.write \
             .format("jdbc") \
@@ -108,6 +106,7 @@ class AppendWeatherData:
             .option("dbtable", "weather") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \
+            .option("batchsize", 1000) \
             .option("driver", "org.postgresql.Driver") \
             .save()
 
