@@ -141,7 +141,24 @@ class AppendMortalityData:
         # #print(dft.show(20))
         return df3
 
+    def group_for_hash(self, df):
+        from pyspark.sql.functions import count
+        df2 = df.groupby(df.state, df.county_fips)\
+                .agg(count(df.date).alias('number')) \
+                .select(df.state, df.county_fips) \
+                .sort(df.state, df.county_fips)
+
+        return df2
+
+
+
     def main(self, d, first_vintage, last_vintage):
+
+        def convert_tuple(tup):
+            str = ''.join(tup)
+            return str
+
+        import hashlib
 
         if first_vintage > last_vintage:
             raise Exception("First year cannot be after the last year")
@@ -158,19 +175,27 @@ class AppendMortalityData:
         for vintage in vintages:
             print(vintage)
             new_df = self.process_year(d, vintage)
-            main_df = main_df.union(new_df)
+            new2_df = self.group_for_hash(new_df)
+            new2_df.show()
+            new2_list = new2_df.collect()
+            #main_df = main_df.union(new_df)
+            new_tu = tuple(new2_list)
+            new2_str = convert_tuple(new_tu)
 
-        main_df.show(20)
+            print(new2_str)
 
-        main_df.write \
-            .format("jdbc") \
-            .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
-            .option("dbtable", "mortality") \
-            .option("user", self.psql_user) \
-            .option("password", self.psql_pw) \
-            .option("driver", "org.postgresql.Driver") \
-            .save()
+            hash_object = hashlib.md5(new2_str)
+            print(hash_object.hexdigest())
+
+        # hash_df.write \
+        #     .format("jdbc") \
+        #     .mode("append") \
+        #     .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
+        #     .option("dbtable", "mort_hash") \
+        #     .option("user", self.psql_user) \
+        #     .option("password", self.psql_pw) \
+        #     .option("driver", "org.postgresql.Driver") \
+        #     .save()
 
         d.spark.stop()
 
