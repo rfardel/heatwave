@@ -32,8 +32,8 @@ class AppendMortalityData:
             IntegerType, StringType, DateType
 
         schema = StructType([
-            StructField('state', StringType(), True),
-            StructField('state_num', IntegerType(), True),
+            StructField('state', IntegerType(), True),
+            #StructField('state_num', IntegerType(), True),
             StructField('county_fips', IntegerType(), True),
             StructField('date', DateType(), True),
             # StructField('weekday', IntegerType(), True),
@@ -128,7 +128,7 @@ class AppendMortalityData:
 
 
         # Deal with unknown days encoded as 99
-        df2 = df2.withColumn('day', when(df2.day >31, 1).otherwise(df2.day))
+        df2 = df2.withColumn('day', when(df2.day >31, '01').otherwise(df2.day))
 
         # Create date from year, month, and day
         df2 = df2.withColumn('date', to_date(unix_timestamp(
@@ -147,11 +147,11 @@ class AppendMortalityData:
 
 
         # Transform state numbers into abbreviations
-        if field_pos['state_format'] == 'num':
-            df2 = df2.withColumnRenamed('state', 'state_num')
-            states = self.get_states(d)
-            states.show(55)
-            df2 = df2.join(states, df2.state_num == states.state_num_code, how='left')
+        # if field_pos['state_format'] == 'num':
+        #     df2 = df2.withColumnRenamed('state', 'state_num')
+        #     states = self.get_states(d)
+        #     states.show(55)
+        #     df2 = df2.join(states, df2.state_num == states.state_num_code, how='left')
             # df4.filter(df4.state == '42').show(50)
 
         # print(schema['year_l'])
@@ -162,7 +162,8 @@ class AppendMortalityData:
         #df2.show(24)
         #
         # # Convert types
-        df3 = df2.withColumn('county_fips_orig', df2['county_fips_orig'].cast(IntegerType())) \
+        df3 = df2.withColumn('state', df2['state'].cast(IntegerType())) \
+                 .withColumn('county_fips_orig', df2['county_fips_orig'].cast(IntegerType())) \
                  .withColumn('co_ref', df2['co_ref'].cast(IntegerType())) \
                  .withColumn('month', df2['month'].cast(IntegerType())) \
                  .withColumn('day', df2['day'].cast(IntegerType()))
@@ -171,11 +172,11 @@ class AppendMortalityData:
 
 
         # # Sum up death counts for each combination of parameters
-        df3 = df3.groupby(df3.state, df3.state_num, df3.county_fips, df3.date) \
+        df3 = df3.groupby(df3.state, df3.county_fips, df3.date) \
             .agg(F.count(df3.date).alias('number')) \
             .sort(df3.state, df3.county_fips, df3.date)
         #
-        #df3.show(30)
+        df3.show(34)
         #
         # #dft = df3.filter(df3.month == 5)
         # #print(dft.show(20))
@@ -198,9 +199,10 @@ class AppendMortalityData:
         for vintage in vintages:
             print(vintage)
             new_df = self.process_year(d, vintage)
+            new_df.show(24)
             main_df = main_df.union(new_df)
 
-        #main_df.show(20)
+        main_df.show(28)
 
         main_df.write \
             .format("jdbc") \
