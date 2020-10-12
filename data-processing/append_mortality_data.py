@@ -84,30 +84,67 @@ class AppendMortalityData:
         df2.show(10)
         return df2
 
+    def get_county_concordance(self, vintage):
+        import math
+        decade = int(math.floor (vintage / 10.0)) * 10
+
+        file = 's3a://data-engineer.club/crosswalk/xw' + str(decade) + '.csv'
+        xwalk = d.spark.read.csv(file, inferSchema=True, header=True)
+        xwalk = xwalk.select(xwalk.fips_state.alias('st_orig'),
+                             xwalk.fips_county.alias('co_orig'),
+                             xwalk.fips_state_1990.alias('st_ref'),
+                             xwalk.fips_county_1990.alias('co_ref'))
+        xwalk = xwalk.withColumn('st_orig', xwalk.st_orig / 10) \
+                     .withColumn('co_orig', xwalk.co_orig / 10) \
+                     .withColumn('st_ref', xwalk.st_ref / 10) \
+                     .withColumn('co_ref', xwalk.co_ref / 10)
+
+        xwalk.show()
+        return xwalk
+
     def process_year(self, d, vintage):
 
         from pyspark.sql.types import IntegerType
         from pyspark.sql import functions as F
         from pyspark.sql.functions import concat, unix_timestamp, to_date, lit
+        from pyspark.sql.functions import when
 
         spark = d.spark
 
         # Read the input file from S3
         file = 's3a://data-engineer.club/mort/mort' + str(vintage) + '.txt'
         df = spark.read.text(file)
-        df.show(20)
+        #df.show(20)
 
         # Extract fields from fixed-width text file
         field_pos = self.load_field_positions(vintage)
         df2 = self.transform_to_schema(df, field_pos)
-        df2.show(20)
+        #df2.show(20)
 
         # Get year from the filename, not from the content
         vintage_str = str(vintage)
 
+
+
+
+        # Deal with unknown days encoded as 99
+        df2 = df2.withColumn('day', when(df2.day >31, 1).otherwise(df2.day))
+
         # Create date from year, month, and day
         df2 = df2.withColumn('date', to_date(unix_timestamp(
             concat(lit(vintage_str), df2.month, df2.day), 'yyyyMMdd').cast('timestamp')))
+
+        # Transform historical county number into 1990 ref standardized number
+        df2 = df2.withColumnRenamed('county_fips', 'county_fips_orig')
+
+        xwalk = self.get_county_concordance(vintage)
+        df2 = df2.join(xwalk, [df2.state == xwalk.st_orig,
+                               df2.county_fips_orig == xwalk.co_orig])
+
+        df2.printSchema()
+
+        #df2 = df2.select()
+
 
         # Transform state numbers into abbreviations
         if field_pos['state_format'] == 'num':
@@ -122,12 +159,15 @@ class AppendMortalityData:
         #    df2 = df2.withColumn('year', concat(lit('19'), df2.year))
 
         #
-        # df2.show(20)
+        #df2.show(24)
         #
         # # Convert types
-        df3 = df2.withColumn('county_fips', df2['county_fips'].cast(IntegerType())) \
+        df3 = df2.withColumn('county_fips_orig', df2['county_fips_orig'].cast(IntegerType())) \
+                 .withColumn('co_ref', df2['co_ref'].cast(IntegerType())) \
                  .withColumn('month', df2['month'].cast(IntegerType())) \
                  .withColumn('day', df2['day'].cast(IntegerType()))
+
+        df3 = df3.withColumnRenamed('co_ref', 'county_fips')
 
 
         # # Sum up death counts for each combination of parameters
@@ -135,7 +175,7 @@ class AppendMortalityData:
             .agg(F.count(df3.date).alias('number')) \
             .sort(df3.state, df3.county_fips, df3.date)
         #
-        df3.show(30)
+        #df3.show(30)
         #
         # #dft = df3.filter(df3.month == 5)
         # #print(dft.show(20))
@@ -151,7 +191,7 @@ class AppendMortalityData:
             raise Exception("Last year out of range")
 
         main_df = d.spark.createDataFrame([], self.create_schema())
-        main_df.show()
+        #main_df.show()
 
         # Generate inclusive list of years
         vintages = range(first_vintage, last_vintage + 1)
@@ -160,7 +200,7 @@ class AppendMortalityData:
             new_df = self.process_year(d, vintage)
             main_df = main_df.union(new_df)
 
-        main_df.show(20)
+        #main_df.show(20)
 
         main_df.write \
             .format("jdbc") \
