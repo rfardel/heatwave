@@ -1,6 +1,6 @@
 CREATE TABLE combined AS (
 SELECT stations.state,
-       counties.nhgisnam AS county_name,
+       counties.county,
        count(stations.name) as nb_stations,
        weather.date,
        weather.measurement,
@@ -13,7 +13,8 @@ LEFT JOIN stations
 ON weather.station = stations.station_id
 
 JOIN counties
-ON (ST_Contains(counties.geom, stations.geom))
+ON (ST_Contains(counties.geom, stations.geom) AND
+    stations.state = counties.state)
 
 JOIN mortality
 ON (mortality.county_fips = counties.cfips
@@ -27,9 +28,9 @@ WHERE weather.station LIKE 'US%'
       --AND stations.state LIKE 'CA'
 GROUP BY stations.state,
          counties.sfips,
-         counties.nhgisnam,
+         counties.county,
          weather.date,
          weather.measurement,
          mortality.date
-ORDER BY weather.date, nb_stations DESC, stations.state, counties.nhgisnam, weather.measurement
+ORDER BY weather.date, nb_stations DESC, stations.state, counties.county, weather.measurement
 );

@@ -19,26 +19,9 @@ psql_pw = j['password']
 # Connect to your postgres DB
 conn = psycopg2.connect(host='10.0.0.14', user=psql_user, password=psql_pw, dbname='heatwave')
 
-# # Open a cursor to perform database operations
-# cur = conn.cursor()
-# sql = "select * from combined limit 10;"
-# df = sqlio.read_sql_query(sql, conn)
-#
-# def generate_table(dataframe, max_rows=10):
-#     return html.Table([
-#         html.Thead(
-#             html.Tr([html.Th(col) for col in dataframe.columns])
-#         ),
-#         html.Tbody([
-#             html.Tr([
-#                 html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-#             ]) for i in range(min(len(dataframe), max_rows))
-#         ])
-#     ])
-
+# Set default table
 d = {'col1': [1, 2], 'col2': [3, 4]}
 df = pd.DataFrame(data=d)
-
 
 BINS = [
     "0-2",
@@ -102,10 +85,10 @@ app.layout = html.Div(
             id="header",
             children=[
                 html.Img(id="logo", src=app.get_asset_url("dash-logo.png")),
-                html.H4(children="Header title"),
+                html.H4(children="Heatwave"),
                 html.P(
                     id="description",
-                    children="Header text",
+                    children="By Romain Fardel - Insight Data Engineering project",
                 ),
             ],
         ),
@@ -125,76 +108,54 @@ app.layout = html.Div(
                                 dcc.Slider(
                                     id="years-slider",
                                     min=1968,
-                                    max=2005,
-                                    value=1968,
+                                    max=1988,
+                                    value=1973,
                                     marks={
                                         str(year): {
                                             "label": str(year),
                                             "style": {"color": "#7fafdf"},
                                         }
-                                        for year in range(1968, 2005)
+                                        for year in range(1968, 1988)
                                     },
                                 ),
                             ],
                         ),
                         html.Div(
-                            id="heatmap-container",
+                            id="graph-container",
                             children=[
-                                html.P(
-                                    "Heatmap in year {0}".format(
-                                        1968
-                                    ),
-                                    id="heatmap-title",
+                                html.P(id="chart-selector", children="Select table to view:"),
+                                dcc.Dropdown(
+                                    options=[
+                                        # {
+                                        #     "label": "Weather data",
+                                        #     "value": "select_weather",
+                                        # },
+                                        # {
+                                        #     "label": "Weather by county",
+                                        #     "value": "select_wbc",
+                                        # },
+                                        # {
+                                        #     "label": "Mortality data",
+                                        #     "value": "select_mortality",
+                                        # },
+                                        {
+                                            "label": "Temperature and mortality",
+                                            "value": "select_T",
+                                        },
+                                        {
+                                            "label": "Weather stations",
+                                            "value": "select_stacoun",
+                                        },
+                                    ],
+                                    value="select_stacoun",
+                                    id="chart-dropdown",
                                 ),
-                                dcc.Graph(
-                                    id="county-choropleth",
-                                    figure=dict(
-                                        layout=dict(
-                                            mapbox=dict(
-                                                layers=[],
-                                                accesstoken=mapbox_access_token,
-                                                style=mapbox_style,
-                                                center=dict(
-                                                    lat=38.72490, lon=-95.61446
-                                                ),
-                                                pitch=0,
-                                                zoom=3.5,
-                                            ),
-                                            autosize=True,
-                                        ),
-                                    ),
-                                ),
+                                html.Div(id='data-table', children='None'),
                             ],
                         ),
                     ],
                 ),
 
-                html.Div(
-                    id="graph-container",
-                    children=[
-                        html.P(id="chart-selector", children="Select chart:"),
-                        dcc.Dropdown(
-                            options=[
-                                {
-                                    "label": "T",
-                                    "value": "select_T",
-                                },
-                                {
-                                    "label": "stations",
-                                    "value": "select_sta",
-                                },
-                                {
-                                    "label": "Simple",
-                                    "value": "simple",
-                                },
-                            ],
-                            value="simple",
-                            id="chart-dropdown",
-                        ),
-                        html.H4(children='Heatwave DB'),
-                        html.Div(id='data-table', children='None'),
-                    ],
-                ),
             ],
         ),
     ],
@@ -211,18 +172,30 @@ app.layout = html.Div(
     ],
 )
 def generate_table(chart_dropdown, year_slider):
-    max_rows = 10;
-    filter = " WHERE date_part('year', date) = " + str(year_slider)
+    max_rows = 12;
+    year_filter = " WHERE date_part('year', agg_date) = " + str(year_slider)
 
     # Open a cursor to perform database operations
     cur = conn.cursor()
-    if chart_dropdown != "select_T":
-        sql = "select * from combined" + filter + " limit 10;"
-    if chart_dropdown != "select_sta":
-            sql = "select * from stations limit 10;"
-    if chart_dropdown == 'simple':
-        sql = "select date, state, countyname, " + \
-              "avg_value, sum_mort from combined" + filter + " limit 10;"
+    if chart_dropdown == "select_stacoun":
+        sql = "select * from stacoun limit 100;"
+
+    if chart_dropdown == "select_T":
+        sql = "select * from combined" + year_filter + \
+              " order by state, county_name, agg_date limit 100;"
+
+    if chart_dropdown == "select_wbc":
+            sql = "select * from weatherbycounty" + \
+                  " order by state, county_name, date limit 100;"
+    if chart_dropdown == "select_mortality":
+        sql = "select * from mortality" + \
+              " WHERE date_part('year', date) = " + str(year_slider) + \
+              " order by state, county_fips, date limit 100;"
+    if chart_dropdown == "select_weather":
+        sql = "select * from weather" + \
+              " WHERE date_part('year', date) = " + str(year_slider) + \
+              " order by station, date limit 100;"
+
     dataframe = sqlio.read_sql_query(sql, conn)
     return html.Table([
         html.Thead(
