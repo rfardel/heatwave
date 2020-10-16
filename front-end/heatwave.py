@@ -23,6 +23,8 @@ conn = psycopg2.connect(host='10.0.0.14', user=psql_user, password=psql_pw, dbna
 d = {'col1': [1, 2], 'col2': [3, 4]}
 df = pd.DataFrame(data=d)
 
+YEARS = list(range(1979, 2000))
+
 BINS = [
     "0-2",
     "2.1-4",
@@ -66,9 +68,6 @@ DEFAULT_OPACITY = 0.8
 mapbox_access_token = "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A"
 mapbox_style = "mapbox://styles/plotlymapbox/cjvprkf3t1kns1cqjxuxmwixz"
 
-#external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-#app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app = dash.Dash(
     __name__,
     meta_tags=[
@@ -107,15 +106,15 @@ app.layout = html.Div(
                                 ),
                                 dcc.Slider(
                                     id="years-slider",
-                                    min=1968,
-                                    max=1988,
-                                    value=1973,
+                                    min=min(YEARS),
+                                    max=max(YEARS),
+                                    value=1988,
                                     marks={
                                         str(year): {
                                             "label": str(year),
                                             "style": {"color": "#7fafdf"},
                                         }
-                                        for year in range(1968, 1988)
+                                        for year in YEARS
                                     },
                                 ),
                             ],
@@ -126,18 +125,6 @@ app.layout = html.Div(
                                 html.P(id="chart-selector", children="Select table to view:"),
                                 dcc.Dropdown(
                                     options=[
-                                        # {
-                                        #     "label": "Weather data",
-                                        #     "value": "select_weather",
-                                        # },
-                                        # {
-                                        #     "label": "Weather by county",
-                                        #     "value": "select_wbc",
-                                        # },
-                                        # {
-                                        #     "label": "Mortality data",
-                                        #     "value": "select_mortality",
-                                        # },
                                         {
                                             "label": "Temperature and mortality",
                                             "value": "select_T",
@@ -147,7 +134,7 @@ app.layout = html.Div(
                                             "value": "select_stacoun",
                                         },
                                     ],
-                                    value="select_stacoun",
+                                    value="select_T",
                                     id="chart-dropdown",
                                 ),
                                 html.Div(id='data-table', children='None'),
@@ -177,24 +164,14 @@ def generate_table(chart_dropdown, year_slider):
 
     # Open a cursor to perform database operations
     cur = conn.cursor()
-    if chart_dropdown == "select_stacoun":
-        sql = "select * from stacoun limit 100;"
 
     if chart_dropdown == "select_T":
-        sql = "select * from combined" + year_filter + \
-              " order by state, county_name, agg_date limit 100;"
+        sql = "select agg_date AS date, state, county_name as county, " + \
+              "avg_value as avg_temperature, sum_mort as mortality_count from combined_mo " + year_filter + \
+              " order by state, county, date limit 100;"
 
-    if chart_dropdown == "select_wbc":
-            sql = "select * from weatherbycounty" + \
-                  " order by state, county_name, date limit 100;"
-    if chart_dropdown == "select_mortality":
-        sql = "select * from mortality" + \
-              " WHERE date_part('year', date) = " + str(year_slider) + \
-              " order by state, county_fips, date limit 100;"
-    if chart_dropdown == "select_weather":
-        sql = "select * from weather" + \
-              " WHERE date_part('year', date) = " + str(year_slider) + \
-              " order by station, date limit 100;"
+    if chart_dropdown == "select_stacoun":
+        sql = "select * from stacoun limit 100;"
 
     dataframe = sqlio.read_sql_query(sql, conn)
     return html.Table([
@@ -209,7 +186,6 @@ def generate_table(chart_dropdown, year_slider):
     ])
 
 # end app callback
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

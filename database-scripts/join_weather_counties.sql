@@ -1,11 +1,11 @@
---
---                 Table "public.weather"
+--               Table "public.weather_mo"
 --   Column    |  Type   | Collation | Nullable | Default
 ---------------+---------+-----------+----------+---------
 -- station     | text    |           |          |
--- date        | date    |           |          |
+-- date_mo     | date    |           |          |
 -- measurement | text    |           |          |
--- value       | integer |           |          |
+-- value       | numeric |           |          |
+
 --
 --
 --
@@ -25,20 +25,20 @@ SELECT stacoun.state,
        stacoun.state_fips,
        stacoun.county_name,
        stacoun.county_fips,
-       weather.date,
-       CAST(AVG(weather.value)/10 AS DECIMAL(9,2)) AS avg_value
-FROM weather
+       weather_mo.date_mo,
+       CAST(AVG(weather_mo.value)/10 AS DECIMAL(9,2)) AS avg_value
+FROM weather_mo
 
 JOIN stacoun
-ON weather.station = stacoun.station_id
+ON weather_mo.station = stacoun.station_id
 
 GROUP BY stacoun.state,
          stacoun.state_fips,
          stacoun.county_name,
          stacoun.county_fips,
-         weather.date
+         weather_mo.date_mo
 
 ORDER BY stacoun.state_fips,
          stacoun.county_fips,
-         weather.date
+         weather_mo.date_mo
 );

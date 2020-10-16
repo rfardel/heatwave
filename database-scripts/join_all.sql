@@ -1,3 +1,4 @@
+--
 --                    Table "public.weatherbycounty"
 --   Column    |         Type          | Collation | Nullable | Default
 ---------------+-----------------------+-----------+----------+---------
@@ -5,35 +6,33 @@
 -- state_fips  | integer               |           |          |
 -- county_name | character varying(50) |           |          |
 -- county_fips | integer               |           |          |
--- date        | date                  |           |          |
+-- date_mo     | date                  |           |          |
 -- avg_value   | numeric(9,2)          |           |          |
 --
---                Table "public.mortality"
+----
+--              Table "public.mortality_mo"
 --   Column    |  Type   | Collation | Nullable | Default
 ---------------+---------+-----------+----------+---------
 -- state       | integer |           |          |
 -- county_fips | integer |           |          |
--- date        | date    |           |          |
--- number      | bigint  |           |          |
+-- date_mo     | date    |           |          |
+-- number_mo   | numeric |           |          |
 
 
-CREATE TABLE combined AS (
-SELECT CAST(date_trunc('month', weatherbycounty.date) AS date) AS agg_date,
+
+CREATE TABLE combined_mo AS (
+SELECT weatherbycounty.date_mo AS agg_date,
        weatherbycounty.state,
        weatherbycounty.county_name,
-       CAST(AVG(weatherbycounty.avg_value)/10 AS DECIMAL(9,2)) AS avg_value,
-       SUM(mortality.number) as sum_mort
+       weatherbycounty.avg_value,
+       mortality_mo.number_mo as sum_mort
 FROM weatherbycounty
 
-JOIN mortality
-ON (weatherbycounty.state_fips = mortality.state AND
-    weatherbycounty.county_fips = mortality.county_fips AND
-    date_trunc('month', weatherbycounty.date) = date_trunc('month', mortality.date)
+JOIN mortality_mo
+ON (weatherbycounty.state_fips = mortality_mo.state AND
+    weatherbycounty.county_fips = mortality_mo.county_fips AND
+    weatherbycounty.date_mo = mortality_mo.date_mo
    )
-
-GROUP BY agg_date,
-         weatherbycounty.state,
-         weatherbycounty.county_name
 
 ORDER BY agg_date,
          weatherbycounty.state,

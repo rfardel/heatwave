@@ -73,7 +73,7 @@ class AppendMortalityData:
             df.value.substr(schema['county_s'], schema['county_l']).alias('county_fips'),
             # df.value.substr(schema['year_s'], schema['year_l']).alias('year'),
             df.value.substr(schema['month_s'], schema['month_l']).alias('month'),
-            df.value.substr(schema['day_s'], schema['day_l']).alias('day')
+            # df.value.substr(schema['day_s'], schema['day_l']).alias('day')
             # df.value.substr(schema['weekday_s'], schema['weekday_l']).alias('weekday'),
             # df.value.substr(schema['manner_s'], schema['manner_l']).alias('manner'),
         )
@@ -124,11 +124,12 @@ class AppendMortalityData:
         # Get year from the filename, not from the content
         vintage_str = str(vintage)
 
-
-
-
         # Deal with unknown days encoded as 99
-        df2 = df2.withColumn('day', when(df2.day >31, '01').otherwise(df2.day))
+        if 'day_s' in self.load_field_positions(vintage):
+            df2 = df2.withColumn('day', when(df2.day >31, '01').otherwise(df2.day))
+        # And with missing day for newer years
+        else:
+            df2 = df2.withColumn('day', lit('01'))
 
         # Create date from year, month, and day
         df2 = df2.withColumn('date', to_date(unix_timestamp(
