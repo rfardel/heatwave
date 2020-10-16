@@ -56,4 +56,15 @@ filtered, and aggregated separately
 ## Data sources
 
 ### Weather
+[NOAA Global Historical Climatology Network Daily (GHCN-D)](https://registry.opendata.aws/noaa-ghcn/), 
+available in an Amazon S3 bucket.
 
+### Mortality
+
+#### Data files
+[CDC - Vital Statistics Online Data Portal](https://www.cdc.gov/nchs/data_access/vitalstatsonline.htm), 
+under _Mortality Multiple Cause Files_, U.S. data (.zip files).
+
+#### Descriptor files
+[CDC - Public Use Data File Documentation](https://www.cdc.gov/nchs/nvss/mortality_public_use_data.htm),
+in PDF format.
