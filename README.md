@@ -3,7 +3,8 @@ _Protecting populations from extreme temperatures_
 
 By Romain Fardel
 
-A project created for the Insight Data Engineering Fellowship, 
+A project created for the 
+[Insight Data Engineering Fellowship](https://insightfellows.com/), 
 Fall 2020 session (20C)
 
 ## Introduction
@@ -35,21 +36,21 @@ where knowledge of the position of each field is needed to extract the data.
 - **County evolution in time**: county limits have changed over the last 50 years.
 
 This project addresses that need by creating a pipeline 
-to combine these datasets and make them available in a GIS-enable database 
-that can be queried by SQL for easy access to the data.
+to combine these datasets and make them available in a GIS-enabled (Geographic Information System) database 
+that the end user can query with SQL.
 
 ## Execution
 
 ![Tech stack](./assets/tech_stack.png)
 
 1. Raw data is stored in Amazon S3
-    - Weather data is readyly avaialble in a NOAA bucket
+    - Weather data is readily available in a NOAA bucket
     - Mortality data is ingested by FTP download, unzipping and saving 
     text files to S3
 1. Raw data is processed in Apache Spark. Each dataset is extracted, 
 filtered, and aggregated separately
-1. Data is loaded to PostgreSQL with the PostGIS (Geographic Inofrmation System) extension
-1. Auxilary datasets (weather station, county definitions) are loaded to PostGIS and joined
+1. Data is loaded to PostgreSQL with the PostGIS extension
+1. Auxillary datasets (weather station, county definitions) are loaded to PostGIS and the data is joined
 1. Final table is queried on demand and displayed in Dash.
 
 ## Data sources
