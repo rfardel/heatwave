@@ -1,77 +1,58 @@
-# heatwave
-Insight Data Engineering Fellowship project
+# Heatwave
+_Protecting populations from extreme temperatures_
 
-## Motivation
+By Romain Fardel
+
+A project created for the Insight Data Engineering Fellowship, 
+Fall 2020 session (20C)
+
+## Introduction
+
+Heatwave can be deadly for populations. For instance, 
+over 30,000 people died from the heatwave that swept Europe 
+during the summer 2003. The issue affects the whole world, 
+and the problem will keep increasing with global warming. 
+
+To protect populations, researchers need to study 
+how mortality is affected by temperature. 
+The problem is that there is currently not a single source of 
+data available to researchers. 
+For the US, researchers need to retrieve vital statistics 
+from the CDC and historical weather data from NOAA. 
+Combining these datasets in challenging for a few reasons:
+
+- **Geographical mismatch**: mortality is reported by county, 
+whereas temperature is reported by weather station.
+
+- **Temporal mismatch**: mortality is reported by day or by month, 
+where temperature is reported at variable intervals depending 
+on the data year and station location.
+
+- **Schema evolution**: the format of mortality data evolves every few years, 
+and data is provided in a non-delimited format, 
+where knowledge of the position of each field is needed to extract the data.
+
+- **County evolution in time**: county limits have changed over the last 50 years.
+
+This project addresses that need by creating a pipeline 
+to combine these datasets and make them available in a GIS-enable database 
+that can be queried by SQL for easy access to the data.
+
+## Execution
+
+![Tech stack](./assets/tech_stack.png)
+
+1. Raw data is stored in Amazon S3
+    - Weather data is readyly avaialble in a NOAA bucket
+    - Mortality data is ingested by FTP download, unzipping and saving 
+    text files to S3
+1. Raw data is processed in Apache Spark. Each dataset is extracted, 
+filtered, and aggregated separately
+1. Data is loaded to PostgreSQL with the PostGIS (Geographic Inofrmation System) extension
+1. Auxilary datasets (weather station, county definitions) are loaded to PostGIS and joined
+1. Final table is queried on demand and displayed in Dash.
 
 ## Data sources
 
-### Weather - main source
-
-Main website:
-https://data.nodc.noaa.gov/cgi-bin/iso?id=gov.noaa.ncdc:C00861
-
-Data readme:
-https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt
-
-Daily data:
-https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/
-
-### Alternative sources: European reanalysis data:
-https://cds.climate.copernicus.eu/cdsapp#!/search?type=dataset
-
-
-##Tech stack installation
-
-PostGIS on Ubuntu 18.04
-https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
-
-From: https://postgis.net/source/
-'wget https://download.osgeo.org/postgis/source/postgis-3.0.2.tar.gz'
-
-From
-
-///
-
-https://computingforgeeks.com/install-postgresql-12-on-ubuntu/
-https://computingforgeeks.com/how-to-install-postgis-on-ubuntu-debian/
-
-Update system:\
-`sudo apt update` \
-`sudo apt -y install vim bash-completion wget` \
-`sudo apt -y upgrade`
-
-`sudo reboot`
-
-`wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -`
-
-`echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" |sudo tee  /etc/apt/sources.list.d/pgdg.list`
-
-`sudo apt update`
-`sudo apt -y install postgresql-12 postgresql-client-12`
-
-
-
-# Tools installation
-
-## Setup PostgreSQL + PostGIS
-
-run `install-postgis_1.sh` \
-This will reboot the instance \
-run `install-postgis_2.sh`
-
-## Connect Spark to Postgres
-
-https://zheguang.github.io/blog/systems/2019/02/16/connect-spark-to-postgres.html
-
-https://severalnines.com/database-blog/big-data-postgresql-and-apache-spark
-
-https://medium.com/@usmanazhar4/how-to-read-and-write-from-database-in-spark-using-pyspark-150d39cdbb72
-
-https://stackoverflow.com/questions/34948296/using-pyspark-to-connect-to-postgresql
-
-https://jdbc.postgresql.org/about/about.html
-
-https://spark.apache.org/docs/latest/sql-data-sources-jdbc.html
-
-https://www.psycopg.org/docs/install.html
+### Weather
 
