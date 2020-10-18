@@ -40,8 +40,6 @@ https://www.psycopg.org/docs/install.html
 
 To run a sql file called `file.sql`, open psql with `psql` and type `\i file.sql`.
 
-1. Import weather stations \
-`submit-stations2db.sh`, which calls `write_weather_stations.py`, both located in `../data-processing/`
 1. Import county shapefiles \
 `import_county_shapes.sh` \
 `extract_fips.sql`

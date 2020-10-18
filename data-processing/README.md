@@ -33,7 +33,7 @@ by changing the 1st and 2nd parameters, respectively (e.g. 1968 1988)
 1. Run `submit-append-mort.sh`, which calls `append_mortality_data.py`
 
 ### Incremental addition
-Both weather and mortality scripts can be called to incrementaly append data to the database.
+Both weather and mortality scripts can be called to incrementally append data to the database.
 Please note than adding the same data year more than once will NOT return an error.
 
 
