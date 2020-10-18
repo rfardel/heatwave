@@ -44,8 +44,8 @@ that the end user can query with SQL.
 ![Tech stack](./assets/tech_stack.png)
 
 1. Raw data is stored in Amazon S3
-    - Weather data is readily available in a NOAA bucket
-    - Mortality data is ingested by FTP download, unzipping and saving 
+    - Weather data is readily available in a NOAA S3 bucket
+    - Mortality data is ingested by downloading from FTP, unzipping and saving 
     text files to S3
 1. Raw data is processed in Apache Spark. Each dataset is extracted, 
 filtered, and aggregated separately
@@ -68,3 +68,12 @@ under _Mortality Multiple Cause Files_, U.S. data (.zip files).
 #### Descriptor files
 [CDC - Public Use Data File Documentation](https://www.cdc.gov/nchs/nvss/mortality_public_use_data.htm),
 in PDF format.
+
+### Weather stations
+`ghcnd-stations.txt` from NOAA bucket
+
+### Counties
+
+
+### County time concordance (a.k.a. crosswalk)
+

@@ -1,29 +1,39 @@
 # Data Processing
 
+## Set up
+
+Set up an Apache Spark cluster with 3 workers and the following software:
+- Ubuntu 18.04 LTS: from an AWS EC2 Amazon Machine Image (AMI)
+- Java: `sudo apt install openjdk-8-jre-headless` to install openjdk >= 1.7.4
+- Scala: `sudo apt install scala` to install version 2.11.12
+- Spark from `spark-2.4.7-bin-hadoop2.7.tgz`
+- PostgreSQL JDBC driver: 
+Download the driver as `jar` file with
+`wget https://jdbc.postgresql.org/download/postgresql-42.2.16.jar` and 
+place it in the home directory `~/`
 
 ## How to run 
 
+### Import weather stations
+
+1. Run `submit-import-stations.sh`, which calls `write_weather_stations.py`
+
 ### Import weather data
 
-
-
-### Import state codes
-1. Find the file `state_code.csv` in S3 and edit the file location in the script.
-1. Submit `import_state_codes.py` to Spark (no parameters) with `submit-import-states.sh`
+1. Modify the start and end year (end year IS included) in `submit-append-weather.sh`
+by changing the 1st and 2nd parameters, respectively (e.g. 1968 2005)
+1. Run `submit-append-weather.sh`, which calls `append_weather_data.py`
 
 ### Import mortality data
-1. Add files in S3 and edit the file location in the script.
-1. Edit the position descriptor file named `mort_schema.json` to reflect the data files in S3 in this folder.
-1. Make sure the `state_codes.csv` is available in the folder.
-1. Submit `append_mortality_data.py` to Spark with the first and last year as parameters (e.g. 1985 1992)
-with `submit-append-mort.sh`.
 
-
-
-
+1. If adding mortality data outside the range 1968 - 2005,
+edit the schema descriptor file `mort_schema.json`.
+1. Modify the start and end year (end year IS included) in `submit-append-mortality.sh`
+by changing the 1st and 2nd parameters, respectively (e.g. 1968 1988)
+1. Run `submit-append-mort.sh`, which calls `append_mortality_data.py`
 
 ### Incremental addition
-1. Add file in S3 and add corresponding field position in `mort_schema.json`.
-1. Submit `append_mortality_data.py` to Spark with the added years as parameters (e.g. 1993 1997).
+Both weather and mortality scripts can be called to incrementaly append data to the database.
+Please note than adding the same data year more than once will NOT return an error.
 
 

@@ -137,3 +137,4 @@ dmypy.json
 /sh_ec2/
 .DS_Store
 .idea/*
+/data-processing/unused/

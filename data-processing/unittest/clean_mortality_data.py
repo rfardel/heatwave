@@ -19,7 +19,7 @@ class CleanMortalityData:
 
     def load_schema(self, vintage):
         import json
-        f = open('mort_schema.json', 'rt')
+        f = open('../mort_schema.json', 'rt')
         j = json.load(f)
         return j[str(vintage)]
 
