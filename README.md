@@ -74,6 +74,9 @@ in PDF format.
 
 ### Counties
 
+[County Boundaries of the United States, 1990](https://geodata.lib.berkeley.edu/catalog/stanford-pb817xw6983)
 
 ### County time concordance (a.k.a. crosswalk)
 
+A Crosswalk for US Spatial Data 1790 - 2000, Fabian Eckert and [Michael Peters](https://mipeters.weebly.com/research.html).
+[ZIP file](https://mipeters.weebly.com/uploads/1/4/6/5/14651240/egp_crosswalk.zip)
