@@ -1,9 +1,12 @@
+/data-processing/unused/
+/database-scripts/unused/
 examples/*
 output/*
 local/*
 scratch/*
 *.txt
 creds.json
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -137,5 +140,4 @@ dmypy.json
 /sh_ec2/
 .DS_Store
 .idea/*
-/data-processing/unused/
-/database-scripts/unused/
+
