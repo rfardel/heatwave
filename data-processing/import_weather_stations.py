@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-class WriteWeatherStations:
+class ImportWeatherStations:
 
     def __init__(self):
         from pyspark.sql import SparkSession
@@ -60,6 +60,6 @@ class WriteWeatherStations:
 
 if __name__ == "__main__":
     import sys
-    d = WriteWeatherStations()
+    d = ImportWeatherStations()
     input_file = str(sys.argv[1])
     d.main(d, input_file)
