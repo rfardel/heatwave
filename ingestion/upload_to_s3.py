@@ -17,14 +17,14 @@ class UploadToS3:
         self.s3dir = 'mort/'
 
         print('Creating temp directories')
-        os.makedirs(self.zipdir, 0o777 )
+        os.makedirs(self.zipdir, 0o777)
         os.makedirs(self.unzipdir, 0o777)
 
         # Open FTP connection
         self.ftp = FTP('ftp.cdc.gov')  # connect to host, default port
         self.ftp.login()  # user anonymous, passwd anonymous@
         self.ftp.cwd('pub/Health_Statistics/NCHS/Datasets/DVS/mortality/')
-        #dir_list = ftp.retrlines('LIST')  # list directory contents
+
 
     def upload_file(self, file_name, bucket, object_name):
         """Upload a file to an S3 bucket
@@ -35,10 +35,8 @@ class UploadToS3:
         :return: True if file was uploaded, else False
         """
 
-        # If S3 object_name was not specified, use file_name
-        #if object_name is None:
-        #    object_name = self.s3dir + file_name
         print(object_name)
+
         # Upload the file
         s3_client = boto3.client('s3')
         try:
@@ -49,19 +47,17 @@ class UploadToS3:
         return True
 
     def download_from_ftp(self, file_name):
-
         command = 'RETR ' + file_name
         with open(self.zipdir + file_name, 'wb') as fp:
             print('Downloading: ' + file_name)
             self.ftp.retrbinary(command, fp.write)
         return
 
-    def main(self):
+    def main(self, start_year, end_year):
         bucket = 'data-engineer.club'
-        for year in range(1969, 1970):      # End year excluded
+        for year in range(start_year, end_year):      # End year excluded
             print('Processing year ' + str(year))
             file_name = 'mort' + str(year) + 'us.zip'
-            #file_name = 'mort2018ps.zip'
 
             # Download the zip file
             self.download_from_ftp(file_name)
@@ -93,5 +89,10 @@ class UploadToS3:
 
 
 if __name__ == "__main__":
+    import sys
+
+    start_year = int(sys.argv[1])
+    end_year = int(sys.argv[2])
+
     uts = UploadToS3()
-    uts.main()
+    uts.main(start_year, end_year)

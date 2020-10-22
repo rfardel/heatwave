@@ -20,6 +20,15 @@ class ReadLargeFile:
         of.close()
 
     def main(self, input_file, output_file, no_lines):
+        '''
+        Read the first lines of a large file and write output in a file.
+        Useful to preview a large file from S3 for instance.
+
+        :param input_file: Large file to read
+        :param output_file: File to write to
+        :param no_lines: Number of lines to write to the output file
+        :return: -
+        '''
 
         # Open the input file
         f = open(input_file, 'rt')
