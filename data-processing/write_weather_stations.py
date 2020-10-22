@@ -44,9 +44,6 @@ class WriteWeatherStations:
             .withColumn("unknown_1", df2["unknown_1"].cast(FloatType())) \
             .withColumn("unknown_4", df2["unknown_4"].cast(IntegerType()))
 
-        # Show first 10 rows
-        df3.show(10)
-
         # Write to a new table in PostgreSQL DB
         df3.write \
             .format("jdbc") \
@@ -57,18 +54,6 @@ class WriteWeatherStations:
             .option("password", self.psql_pw) \
             .option("driver", "org.postgresql.Driver") \
             .save()
-
-        # Read back that table and show first 10 rows
-        df4 = spark.read \
-            .format("jdbc") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
-            .option("dbtable", "stations") \
-            .option("user", self.psql_user) \
-            .option("password", self.psql_pw) \
-            .option("driver", "org.postgresql.Driver") \
-            .load()
-
-        df4.show()
 
         spark.stop()
 

@@ -15,10 +15,12 @@ class AppendWeatherData:
             .appName("Write weather data to DB") \
             .getOrCreate()
 
-
     def create_final_schema(self):
+        '''
+        Create schema for the final storage in the database
 
-        # Return a schema for the yyyy.CSV file
+        :return: Schema
+        '''
         from pyspark.sql.types import StructType, StructField,\
             IntegerType, StringType, DateType
 
@@ -32,8 +34,12 @@ class AppendWeatherData:
         return schema
 
     def create_input_schema(self):
+        '''
+        Create schema found in the weather data files.
 
-        # Return a schema for the yyyy.CSV file
+        :return: Schema
+        '''
+
         from pyspark.sql.types import StructType, StructField,\
             IntegerType, StringType
 
@@ -51,7 +57,14 @@ class AppendWeatherData:
         return schema
 
     def process_year(self, d, vintage):
+        '''
+        Read from S3 the weather file from the year passed as argument and
+        filter the entries to keep only the average temperature.
 
+        :param d: Class instance
+        :param vintage: 4-digit year
+        :return: Dataframe containing one year of average temperature data
+        '''
         from pyspark.sql.functions import unix_timestamp, to_date, col
 
         spark = d.spark
@@ -60,28 +73,33 @@ class AppendWeatherData:
         # Read the input file from S3
         file = 's3a://data-engineer.club/csv/' + str(vintage) + '.csv'
         df = spark.read.csv(file, schema=weather_schema, header=False)
-        df.show(22)
 
         # Fix date format
         df = df.withColumn('date', to_date(unix_timestamp(col('date'),
                                            'yyyyMMdd').cast("timestamp")))
 
         # Filter only the average T measurement
-        dft = df.filter(df.measurement == 'TAVG')
+        df_tavg = df.filter(df.measurement == 'TAVG')
 
-        dft = dft.select(
-            dft.station,
-            dft.date,
-            dft.measurement,
-            dft.value
+        df_tavg = df_tavg.select(
+            df_tavg.station,
+            df_tavg.date,
+            df_tavg.measurement,
+            df_tavg.value
         )
 
-        dft.show(24)
-
-        return dft
+        return df_tavg
 
     def main(self, d, first_vintage, last_vintage):
+        '''
+        Load in a Dataframe a range of weather data year and
+        append it to the weather table in PostgreSQL
 
+        :param d: Class instance
+        :param first_vintage: first year in the range
+        :param last_vintage:  last year in the range, inclusive
+        :return: -
+        '''
         if first_vintage > last_vintage:
             raise Exception("First year cannot be after the last year")
         if (first_vintage < 1968) or (first_vintage > 2018):
@@ -89,16 +107,17 @@ class AppendWeatherData:
         if (last_vintage < 1968) or (last_vintage > 2018):
             raise Exception("Last year out of range")
 
+        # Create empty dataframe to gather all years
         main_df = d.spark.createDataFrame([], self.create_final_schema())
-        main_df.show()
 
+        # Load year by year and append to the main dataframe
         vintages = range(first_vintage, last_vintage + 1)
         for vintage in vintages:
             print(vintage)
             new_df = self.process_year(d, vintage)
             main_df = main_df.union(new_df)
 
-        # Write to a new table in PostgreSQL DB
+        # Write to PostgreSQL
         main_df.write \
             .format("jdbc") \
             .mode("append") \
