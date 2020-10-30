@@ -1,14 +1,3 @@
---heatwave=# \d mortality
---                Table "public.mortality"
---   Column    |  Type   | Collation | Nullable | Default
----------------+---------+-----------+----------+---------
--- state       | integer |           |          |
--- county_fips | integer |           |          |
--- date        | date    |           |          |
--- number      | bigint  |           |          |
-
-
-
 CREATE TABLE mortality_mo AS (
 SELECT state,
        county_fips,

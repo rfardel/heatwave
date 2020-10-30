@@ -1,12 +1,3 @@
---                 Table "public.weather"
---   Column    |  Type   | Collation | Nullable | Default
----------------+---------+-----------+----------+---------
--- station     | text    |           |          |
--- date        | date    |           |          |
--- measurement | text    |           |          |
--- value       | integer |           |          |
---
-
 CREATE TABLE weather_mo AS (
 SELECT station,
        CAST(date_trunc('month', weather.date) AS date) AS date_mo,

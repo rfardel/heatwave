@@ -1,25 +1,3 @@
---               Table "public.weather_mo"
---   Column    |  Type   | Collation | Nullable | Default
----------------+---------+-----------+----------+---------
--- station     | text    |           |          |
--- date_mo     | date    |           |          |
--- measurement | text    |           |          |
--- value       | numeric |           |          |
-
---
---
---
---                        Table "public.stacoun"
---   Column    |         Type          | Collation | Nullable | Default
----------------+-----------------------+-----------+----------+---------
--- station_id  | text                  |           |          |
--- state       | text                  |           |          |
--- county_name | character varying(50) |           |          |
--- state_fips  | integer               |           |          |
--- county_fips | integer               |           |          |
--- name        | text                  |           |          |
-
-
 CREATE TABLE weatherbycounty AS (
 SELECT stacoun.state,
        stacoun.state_fips,

@@ -1,4 +1,4 @@
-# Database joining and querying
+# Database: adding supporting files, joining, and querying
 
 ## Set up
 
@@ -10,21 +10,24 @@ This will reboot the instance
 
 ## How to run 
 
-### Initial run
-1. Add files in S3 and edit the file location in the script.
-1. Download the counties shapefiles from S3.
-1. Load counties with `import_county_shapes_co1990p020.sh`
-1. Join counties and stations with `join_counties_stations.sql`.
+Note: To run a sql file called `file.sql`, open psql with `psql` and type `\i file.sql`.
 
+### Load the data from Spark
+
+1. Once PostgreSQL + PostGIS is ready, load the weather and mortality data from Spark, see `data-processing` folder.'
 
 ### Add supporting files
 
-To run a sql file called `file.sql`, open psql with `psql` and type `\i file.sql`.
+1. Load from S3 and import county shapefiles: `import_county_shapes.sh`
 
-1. Import county shapefiles \
-`import_county_shapes.sh` \
-`extract_fips.sql`
-1. Convert station lat/long into GIS points \
-`stations_to_geom.sql`
-1. Create joined tables with counties and contained stations
-`join_stations.sql`
+### Preprocess
+
+1. Convert station lat/long into GIS points with `stations_to_geom.sql`.
+1. Aggregate weather data by month with `weather_monthly.sql`.
+1. Aggregate mortality data by month with `mortality_monthly.sql`.
+
+### Join
+
+1. Join counties and stations with `join_counties_stations.sql`. This is the spatial join using `STContains`.
+1. Join weather and counties with `join_weather_counties.sql`.
+1. Join mortality with weather by counties with `join_mortality.sql`.
