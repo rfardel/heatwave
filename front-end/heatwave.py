@@ -23,7 +23,7 @@ conn = psycopg2.connect(host='10.0.0.14', user=psql_user, password=psql_pw, dbna
 d = {'col1': [1, 2], 'col2': [3, 4]}
 df = pd.DataFrame(data=d)
 
-YEARS = list(range(1979, 2000))
+YEARS = list(range(1982, 2000))
 
 BINS = [
     "0-2",
@@ -108,7 +108,7 @@ app.layout = html.Div(
                                     id="years-slider",
                                     min=min(YEARS),
                                     max=max(YEARS),
-                                    value=1988,
+                                    value=1991,
                                     marks={
                                         str(year): {
                                             "label": str(year),

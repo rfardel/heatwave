@@ -722,6 +722,11 @@ hr {
     background-color: #252e3f;
     padding: 5rem;
     margin: 0;
+    /* font-size: 11px;
+    color: #7fafdf; */
+    font-size: 14px;
+    color: #CCD8FF;
+
 }
 
 @media (max-width: 1250px) {
