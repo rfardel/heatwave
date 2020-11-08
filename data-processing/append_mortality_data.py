@@ -6,6 +6,7 @@ class AppendMortalityData:
     def __init__(self):
         from pyspark.sql import SparkSession
         import os
+        import json
 
         self.psql_user = os.environ['POSTGRESQL_USER']
         self.psql_pw = os.environ['POSTGRESQL_PASSWORD']
@@ -14,6 +15,10 @@ class AppendMortalityData:
             .builder \
             .appName("Write mortality data to DB") \
             .getOrCreate()
+
+        config_file = open('spark_config.json', 'rt')
+        self.conf = json.load(config_file)
+        config_file.close()
 
     def create_schema(self):
         '''
@@ -76,7 +81,7 @@ class AppendMortalityData:
         import math
         decade = int(math.floor(vintage / 10.0)) * 10
 
-        file = 's3a://data-engineer.club/crosswalk/xw' + str(decade) + '.csv'
+        file = self.conf['crosswalk_path'] + str(decade) + '.csv'
         xwalk = d.spark.read.csv(file, inferSchema=True, header=True)
         xwalk = xwalk.select(xwalk.fips_state.alias('st_orig'),
                              xwalk.fips_county.alias('co_orig'),
@@ -107,7 +112,7 @@ class AppendMortalityData:
         spark = d.spark
 
         # Read the input file from S3
-        file = 's3a://data-engineer.club/mort/mort' + str(vintage) + '.txt'
+        file = self.conf['mort_path'] + str(vintage) + '.txt'
         df_nondelimited = spark.read.text(file)
 
         # Extract fields from fixed-width text file
@@ -183,7 +188,7 @@ class AppendMortalityData:
         main_df.write \
             .format("jdbc") \
             .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
+            .option("url", self.conf['postgresql_url']) \
             .option("dbtable", "mortality") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \

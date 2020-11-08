@@ -1,0 +1,6 @@
+{
+  "mort_path": "s3a://data-engineer.club/mort/mort",
+  "weather_path": "s3a://data-engineer.club/csv/",
+  "crosswalk_path": "s3a://data-engineer.club/crosswalk/xw",
+  "postgresql_url": "jdbc:postgresql://10.0.0.14:5432/heatwave"
+}

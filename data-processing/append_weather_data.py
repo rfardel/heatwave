@@ -6,6 +6,7 @@ class AppendWeatherData:
     def __init__(self):
         from pyspark.sql import SparkSession
         import os
+        import json
 
         self.psql_user = os.environ['POSTGRESQL_USER']
         self.psql_pw = os.environ['POSTGRESQL_PASSWORD']
@@ -14,6 +15,10 @@ class AppendWeatherData:
             .builder \
             .appName("Write weather data to DB") \
             .getOrCreate()
+
+        config_file = open('spark_config.json', 'rt')
+        self.conf = json.load(config_file)
+        config_file.close()
 
     def create_final_schema(self):
         '''
@@ -71,7 +76,7 @@ class AppendWeatherData:
         weather_schema = self.create_input_schema()
 
         # Read the input file from S3
-        file = 's3a://data-engineer.club/csv/' + str(vintage) + '.csv'
+        file = self.conf['weather_path'] + str(vintage) + '.csv'
         df = spark.read.csv(file, schema=weather_schema, header=False)
 
         # Fix date format
@@ -121,7 +126,7 @@ class AppendWeatherData:
         main_df.write \
             .format("jdbc") \
             .mode("append") \
-            .option("url", "jdbc:postgresql://10.0.0.14:5432/heatwave") \
+            .option("url", self.conf['postgresql_url']) \
             .option("dbtable", "weather") \
             .option("user", self.psql_user) \
             .option("password", self.psql_pw) \

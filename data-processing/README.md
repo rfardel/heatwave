@@ -14,6 +14,10 @@ place it in the home directory `~/`
 
 ## How to run 
 
+### File paths
+
+1. Adapt the data file directories as needed in `spark_config.json`
+
 ### Import weather stations
 
 1. Run `submit-import-stations.sh`, which calls `write_weather_stations.py`
